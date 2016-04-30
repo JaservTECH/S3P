@@ -1,0 +1,2694 @@
+Index: app/src/main/java/com/jafar/jaservtech/system3pjagung/dummy/DBHandler.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/jafar/jaservtech/system3pjagung/dummy/DBHandler.java	(revision )
++++ app/src/main/java/com/jafar/jaservtech/system3pjagung/dummy/DBHandler.java	(revision )
+@@ -0,0 +1,206 @@
++package com.jafar.jaservtech.system3pjagung.dummy;
++
++
++import android.content.ContentValues;
++import android.content.Context;
++import android.database.Cursor;
++import android.database.sqlite.SQLiteDatabase;
++import android.database.sqlite.SQLiteOpenHelper;
++
++import java.util.ArrayList;
++import java.util.List;
++/**
++ * Created by Jafar on 4/5/2016.
++ */
++public class DBHandler extends  SQLiteOpenHelper{
++
++    // Database Version
++    private static final int DATABASE_VERSION = 1;
++
++    // Database Name
++    private static final String DATABASE_NAME = "System_third_p";
++
++    // Contacts table name
++    private static final String TABLE_ProgressS = "sc_prog";
++    private static final String TABLE_ProgressS2 = "sc_detail_prog";
++
++    // Progresss Table Columns names
++    private static final String KEY_ID = "p_id";
++    private static final String KEY_NAME = "p_name";
++    private static final String KEY_SH_ADDR = "p_address";
++    private static final String KEY_SH_SDATE = "p_start_date";
++    private static final String KEY_SH_EDATE = "p_end_date";
++    private static final String KEY_SH_AUT = "p_auth";
++    private static final String KEY_SH_FIN = "p_finish";
++    private static final String KEY_SH_CAT = "p_cat";
++    private static final String KEY_SH_PERC = "p_percent";
++
++    public DBHandler(Context context) {
++        super(context, DATABASE_NAME, null, DATABASE_VERSION);
++    }
++
++    @Override
++    public void onCreate(SQLiteDatabase db) {
++        String CREATE_CONTACTS_TABLE = "CREATE TABLE " + TABLE_ProgressS + "("
++                + KEY_ID + " TEXT PRIMARY KEY,"
++                + KEY_NAME + " TEXT,"
++                + KEY_SH_ADDR + " TEXT,"
++                + KEY_SH_SDATE + " TEXT,"
++                + KEY_SH_EDATE + " TEXT,"
++                + KEY_SH_AUT + " TEXT,"
++                + KEY_SH_FIN + " INTEGER,"
++                + KEY_SH_CAT + " INTEGER,"
++                + KEY_SH_PERC + " INTEGER"
++                + ")";
++        db.execSQL(CREATE_CONTACTS_TABLE);
++    }
++
++    @Override
++    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
++        // Drop older table if existed
++        db.execSQL("DROP TABLE IF EXISTS " + TABLE_ProgressS);
++        // Creating tables again
++        onCreate(db);
++    }
++    //SESSION PROGRESS
++    // Adding new Progress okay
++    public boolean addProgress(Progress Progress) {
++        SQLiteDatabase db = this.getWritableDatabase();
++
++        ContentValues values = new ContentValues();
++        values.put(KEY_ID, Progress.getId()); // Progress Phone Number
++        values.put(KEY_NAME, Progress.getName()); // Progress Name
++        values.put(KEY_SH_ADDR, Progress.getAddress()); // Progress Address of field
++        values.put(KEY_SH_SDATE, Progress.getStartDate()); // Progress Start farming
++        values.put(KEY_SH_EDATE, Progress.getEndDate()); // Progress End Farming
++        values.put(KEY_SH_AUT, Progress.getAuth()); // Progress Stake holder
++        values.put(KEY_SH_FIN, Progress.getFinish()); // Progress finish
++        values.put(KEY_SH_CAT, Progress.getCat()); // Category
++        values.put(KEY_SH_PERC, Progress.getPercentage()); // Progress percentage
++        // Inserting Row
++        db.insert(TABLE_ProgressS, null, values);
++        db.close(); // Closing database connection
++        return true;
++    }
++
++    // Getting one Progress
++    public Progress getProgress(String id) {
++        SQLiteDatabase db = this.getReadableDatabase();
++
++        Cursor cursor = db.query(TABLE_ProgressS, new String[]{KEY_ID,
++                        KEY_NAME, KEY_SH_ADDR}, KEY_ID + "=?",
++                new String[]{String.valueOf(id)}, null, null, null, null);
++        if (cursor == null)
++            return null;
++        cursor.moveToFirst();
++
++        Progress contact = new Progress();
++        contact.setId(cursor.getString(0));
++        contact.setName(cursor.getString(1));
++        contact.setAddress(cursor.getString(2));
++        contact.setStartDate(cursor.getString(3));
++        contact.setEndDate(cursor.getString(4));
++        contact.setAuth(cursor.getString(5));
++        contact.setFinish(Integer.parseInt(cursor.getString(6)));
++        contact.setCat(Integer.parseInt(cursor.getString(7)));
++        contact.setPercentage(Integer.parseInt(cursor.getString(8)));
++        // return Progress
++        return contact;
++    }
++
++    // Getting All Progresss
++    public List<Progress> getAllProgresss() {
++        List<Progress> ProgressList = new ArrayList<Progress>();
++        // Select All Query
++        String selectQuery = "SELECT  * FROM " + TABLE_ProgressS;
++
++        SQLiteDatabase db = this.getWritableDatabase();
++        Cursor cursor = db.rawQuery(selectQuery, null);
++
++        // looping through all rows and adding to list
++        if (cursor.moveToFirst()) {
++            do {
++                Progress contact = new Progress();
++                contact.setId(cursor.getString(0));
++                contact.setName(cursor.getString(1));
++                contact.setAddress(cursor.getString(2));
++                contact.setStartDate(cursor.getString(3));
++                contact.setEndDate(cursor.getString(4));
++                contact.setAuth(cursor.getString(5));
++                contact.setFinish(Integer.parseInt(cursor.getString(6)));
++                contact.setCat(Integer.parseInt(cursor.getString(7)));
++                contact.setPercentage(Integer.parseInt(cursor.getString(8)));
++                // Adding contact to list
++                ProgressList.add(contact);
++            } while (cursor.moveToNext());
++        }
++
++        // return contact list
++        return ProgressList;
++    }
++
++    public List<Progress> getAllProgHistory() {
++        List<Progress> ProgressList = new ArrayList<Progress>();
++        // Select All Query
++        String selectQuery = "SELECT  * FROM " + TABLE_ProgressS+"WHERE "+KEY_SH_FIN+"=1";
++
++        SQLiteDatabase db = this.getWritableDatabase();
++        Cursor cursor = db.rawQuery(selectQuery, null);
++
++        // looping through all rows and adding to list
++        if (cursor.moveToFirst()) {
++            do {
++                Progress contact = new Progress();
++                contact.setId(cursor.getString(0));
++                contact.setName(cursor.getString(1));
++                contact.setAddress(cursor.getString(2));
++                contact.setStartDate(cursor.getString(3));
++                contact.setEndDate(cursor.getString(4));
++                contact.setAuth(cursor.getString(5));
++                contact.setFinish(Integer.parseInt(cursor.getString(6)));
++                contact.setCat(Integer.parseInt(cursor.getString(7)));
++                contact.setPercentage(Integer.parseInt(cursor.getString(8)));
++                // Adding contact to list
++                ProgressList.add(contact);
++            } while (cursor.moveToNext());
++        }
++
++        // return contact list
++        return ProgressList;
++    }
++    // Getting ProgresssHistory Count
++    public int getProgresssHisCount(int t) {
++        String countQuery = "SELECT  * FROM " + TABLE_ProgressS + " WHERE " + KEY_SH_FIN + "=" + t;
++        SQLiteDatabase db = this.getWritableDatabase();
++        return db.rawQuery(countQuery, null).getCount();
++    }
++
++    // Updating a Progress
++    public int updateProgress(Progress Progress) {
++        SQLiteDatabase db = this.getWritableDatabase();
++
++        ContentValues values = new ContentValues();
++        values.put(KEY_NAME, Progress.getName()); // Progress Name
++        values.put(KEY_SH_ADDR, Progress.getAddress()); // Progress Address of field
++        values.put(KEY_SH_SDATE, Progress.getStartDate()); // Progress Start farming
++        values.put(KEY_SH_EDATE, Progress.getEndDate()); // Progress End Farming
++        values.put(KEY_SH_AUT, Progress.getAuth()); // Progress Stake holder
++        values.put(KEY_SH_FIN, Progress.getFinish()); // Progress finish
++        values.put(KEY_SH_CAT, Progress.getCat()); // kategori
++        values.put(KEY_SH_PERC, Progress.getPercentage()); // Progress percentage
++
++        // updating row
++        return db.update(TABLE_ProgressS, values, KEY_ID + " = ?",
++                new String[]{String.valueOf(Progress.getId())});
++    }
++
++    // Deleting a Progress
++    public void deleteProgress(Progress Progress) {
++        SQLiteDatabase db = this.getWritableDatabase();
++        db.delete(TABLE_ProgressS, KEY_ID + " = ?",
++                new String[] { String.valueOf(Progress.getId()) });
++        db.close();
++    }
++}
++
++
+Index: app/src/main/res/layout/activity_create_progress_next.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_create_progress_next.xml	(revision )
++++ app/src/main/res/layout/activity_create_progress_next.xml	(revision )
+@@ -0,0 +1,130 @@
++<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:tools="http://schemas.android.com/tools"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    android:gravity="center_horizontal"
++    android:orientation="vertical"
++    android:paddingBottom="@dimen/activity_vertical_margin"
++    android:paddingLeft="@dimen/activity_horizontal_margin"
++    android:paddingRight="@dimen/activity_horizontal_margin"
++    android:paddingTop="@dimen/activity_vertical_margin"
++    tools:context="com.jafar.jaservtech.system3pjagung.CreateProgressNext">
++
++    <!-- Login progress -->
++    <ProgressBar
++        android:id="@+id/login_progress"
++        style="?android:attr/progressBarStyleLarge"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:layout_marginBottom="8dp"
++        android:visibility="gone" />
++    <RelativeLayout
++        android:layout_width="match_parent"
++        android:layout_height="match_parent">
++        <ScrollView
++            android:id="@+id/login_form"
++            android:layout_width="match_parent"
++            android:layout_height="match_parent">
++
++            <LinearLayout
++                android:id="@+id/email_login_form"
++                android:layout_width="match_parent"
++                android:layout_height="wrap_content"
++                android:orientation="vertical">
++
++                <android.support.design.widget.TextInputLayout
++                    android:layout_height="wrap_content"
++                    android:layout_width="match_parent">
++                    <EditText
++                        android:layout_width="match_parent"
++                        android:layout_height="wrap_content"
++                        android:hint="Nama progress"
++                        android:id="@+id/namaProgress"
++                        android:inputType="text"/>
++                </android.support.design.widget.TextInputLayout>
++                <android.support.design.widget.TextInputLayout
++                    android:layout_height="wrap_content"
++                    android:layout_width="match_parent">
++                    <EditText
++                        android:layout_width="match_parent"
++                        android:layout_height="wrap_content"
++                        android:hint="Alamat progress"
++                        android:id="@+id/alamatProgress"
++                        android:inputType="text"/>
++                </android.support.design.widget.TextInputLayout>
++                <android.support.design.widget.TextInputLayout
++                    android:layout_height="wrap_content"
++                    android:layout_width="match_parent">
++                    <EditText
++                        android:layout_width="match_parent"
++                        android:layout_height="wrap_content"
++                        android:hint="Informer"
++                        android:id="@+id/informerProgress"
++                        android:inputType="text"/>
++                </android.support.design.widget.TextInputLayout>
++                <android.support.design.widget.TextInputLayout
++                    android:layout_height="wrap_content"
++                    android:layout_width="match_parent">
++                    <EditText
++                        android:layout_width="match_parent"
++                        android:layout_height="wrap_content"
++                        android:hint="Mulai progress"
++                        android:id="@+id/startProgress"
++                        android:inputType="date"
++                        android:focusable="false"
++                        android:clickable="true" />
++                </android.support.design.widget.TextInputLayout>
++
++                <Button
++                    android:id="@+id/email_sign_in_button"
++                    style="?android:textAppearanceSmall"
++                    android:layout_width="match_parent"
++                    android:layout_height="wrap_content"
++                    android:layout_marginTop="16dp"
++                    android:text="@string/action_sign_in"
++                    android:textStyle="bold" />
++
++            </LinearLayout>
++        </ScrollView>
++        <RelativeLayout
++            android:layout_width="match_parent"
++            android:background="#fefffe"
++            android:alpha="0"
++            android:id="@+id/showCalendar"
++            android:visibility="gone"
++            android:gravity="center"
++            android:textAlignment="center"
++            android:layout_height="match_parent">
++            <LinearLayout
++                android:layout_width="match_parent"
++                android:orientation="vertical"
++                android:layout_height="match_parent">
++                <LinearLayout
++                    android:layout_width="match_parent"
++                    android:layout_height="wrap_content"
++                    android:gravity="center"
++                    android:layout_weight="1">
++                    <DatePicker
++                        android:layout_width="240dp"
++                        android:layout_height="150dp"
++                        android:id="@+id/datePicker"
++                        android:clipChildren="false"
++                        android:foregroundGravity="center"
++                        android:calendarViewShown="false" />
++                </LinearLayout>
++                <LinearLayout
++                    android:layout_width="match_parent"
++                    android:layout_height="wrap_content"
++                    android:gravity="center"
++                    android:layout_weight="1">
++                    <Button
++                        android:layout_width="@dimen/app_bar_height"
++                        android:id="@+id/pilihDateTimePicker"
++                        android:layout_height="wrap_content"
++                        android:text="Pilih"
++                        android:textSize="20sp" />
++                </LinearLayout>
++            </LinearLayout>
++        </RelativeLayout>
++    </RelativeLayout>
++</LinearLayout>
+Index: app/src/main/res/drawable-v21/ic_menu_manage.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/drawable-v21/ic_menu_manage.xml	(revision )
++++ app/src/main/res/drawable-v21/ic_menu_manage.xml	(revision )
+@@ -0,0 +1,9 @@
++<vector xmlns:android="http://schemas.android.com/apk/res/android"
++    android:width="24dp"
++    android:height="24dp"
++    android:viewportHeight="24.0"
++    android:viewportWidth="24.0">
++    <path
++        android:fillColor="#FF000000"
++        android:pathData="M22.7,19l-9.1,-9.1c0.9,-2.3 0.4,-5 -1.5,-6.9 -2,-2 -5,-2.4 -7.4,-1.3L9,6 6,9 1.6,4.7C0.4,7.1 0.9,10.1 2.9,12.1c1.9,1.9 4.6,2.4 6.9,1.5l9.1,9.1c0.4,0.4 1,0.4 1.4,0l2.3,-2.3c0.5,-0.4 0.5,-1.1 0.1,-1.4z" />
++</vector>
+\ No newline at end of file
+Index: app/src/main/java/com/jafar/jaservtech/system3pjagung/HomeOfSystem.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/jafar/jaservtech/system3pjagung/HomeOfSystem.java	(revision )
++++ app/src/main/java/com/jafar/jaservtech/system3pjagung/HomeOfSystem.java	(revision )
+@@ -0,0 +1,243 @@
++package com.jafar.jaservtech.system3pjagung;
++
++import android.animation.Animator;
++import android.animation.AnimatorListenerAdapter;
++import android.content.Intent;
++import android.os.Bundle;
++import android.support.design.widget.FloatingActionButton;
++import android.support.design.widget.NavigationView;
++import android.support.v4.view.GravityCompat;
++import android.support.v4.widget.DrawerLayout;
++import android.support.v7.app.ActionBarDrawerToggle;
++import android.support.v7.app.AppCompatActivity;
++import android.support.v7.widget.Toolbar;
++import android.view.LayoutInflater;
++import android.view.MenuItem;
++import android.view.View;
++import android.widget.Button;
++import android.widget.ImageView;
++import android.widget.LinearLayout;
++import android.widget.RelativeLayout;
++import android.widget.TextView;
++import android.widget.Toast;
++
++import com.jafar.jaservtech.system3pjagung.dummy.DBHandler;
++
++public class HomeOfSystem extends AppCompatActivity
++        implements NavigationView.OnNavigationItemSelectedListener {
++    protected RelativeLayout home,progress,history,help,addProg;
++    protected FloatingActionButton fab;
++    protected ImageView createNew, createNext, backCreate;
++    protected Button h,ll;
++    protected LinearLayout j;
++    protected LinearLayout viewProg;
++    protected DBHandler db;
++    protected void initial(){
++        viewProg = (LinearLayout)findViewById(R.id.viewerProgress);
++        home = (RelativeLayout)findViewById(R.id.home_layout);
++        progress = (RelativeLayout)findViewById(R.id.progress_layout);
++        history = (RelativeLayout)findViewById(R.id.history_layout);
++        help = (RelativeLayout)findViewById(R.id.help_layout);
++        db = new DBHandler(HomeOfSystem.this);
++        //h = (Button)findViewById(R.id.getLayout);
++        //ll = (Button)findViewById(R.id.getGoneLayout);
++        //j = (LinearLayout)findViewById(R.id.contentLayout);
++        createNew = (ImageView)findViewById(R.id.newProgress);
++        createNext = (ImageView)findViewById(R.id.nextProgress);
++        createNew.setOnClickListener(new View.OnClickListener() {
++            @Override
++            public void onClick(View v) {
++                startActivity(new Intent(HomeOfSystem.this, CreateProgressDefault.class));
++                addProgHide();
++                fab.show();
++            }
++        });
++        createNext.setOnClickListener(new View.OnClickListener() {
++            @Override
++            public void onClick(View v) {
++                startActivity(new Intent(HomeOfSystem.this, CreateProgressNext.class));
++                addProgHide();
++                fab.show();
++            }
++        });
++        backCreate = (ImageView)findViewById(R.id.outProgress);
++        addProg = (RelativeLayout)findViewById(R.id.optionCreateProgress);
++        backCreate.setOnClickListener(new View.OnClickListener() {
++            @Override
++            public void onClick(View v) {
++                addProgHide();
++                fab.show();
++            }
++        });
++        LayoutInflater inflater = (LayoutInflater)this.getSystemService(LAYOUT_INFLATER_SERVICE);
++        View jojo, kokos;
++        LinearLayout kokol;
++        for(int z = 0;z < 10;z++ ){
++            final int kei = z;
++            jojo = inflater.inflate(R.layout.button_show_list,null);
++            jojo.setOnClickListener(new View.OnClickListener() {
++                @Override
++                public void onClick(View v) {
++                    Toast.makeText(HomeOfSystem.this,"show : "+ kei,Toast.LENGTH_LONG).show();
++                }
++            });
++            kokos = inflater.inflate(R.layout.button_delete_list,null);
++            kokos.setOnClickListener(new View.OnClickListener() {
++                @Override
++                public void onClick(View v) {
++                    viewProg.removeViewAt(kei);
++                    Toast.makeText(HomeOfSystem.this, "delete  : " + kei, Toast.LENGTH_LONG).show();
++                }
++            });
++            kokol = (LinearLayout)inflater.inflate(R.layout.content_view_list,null);
++            kokol.addView(jojo);
++            kokol.addView(kokos);
++            kokol.setMinimumWidth(100);
++            viewProg.addView(kokol);
++        }
++    }
++    protected void showLayout(RelativeLayout temp){
++        home.setVisibility(View.GONE);
++        progress.setVisibility(View.GONE);
++        history.setVisibility(View.GONE);
++        help.setVisibility(View.GONE);
++        temp.setVisibility(View.VISIBLE);
++    }
++    @Override
++    protected void onCreate(Bundle savedInstanceState) {
++        super.onCreate(savedInstanceState);
++        setContentView(R.layout.activity_home_of_system);
++        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
++        setSupportActionBar(toolbar);
++
++        fab = (FloatingActionButton) findViewById(R.id.fab);
++        fab.setOnClickListener(new View.OnClickListener() {
++            @Override
++            public void onClick(View view) {
++                fab.hide();
++                addProgShow();
++            }
++        });
++        fab.hide();
++        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
++        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
++                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
++        drawer.setDrawerListener(toggle);
++        toggle.syncState();
++
++        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
++        navigationView.setNavigationItemSelectedListener(this);
++        initial();
++        refreshHistoryFastInfo();
++        refreshProgresFastInfo();
++        ImageView a,b;
++        a=(ImageView)findViewById(R.id.refreshHistoryFastInfo);
++        b=(ImageView)findViewById(R.id.refreshProgressFastInfo);
++        a.setOnClickListener(new View.OnClickListener() {
++            @Override
++            public void onClick(View v) {
++                refreshHistoryFastInfo();
++            }
++        });
++        b.setOnClickListener(new View.OnClickListener() {
++            @Override
++            public void onClick(View v) {
++                refreshProgresFastInfo();
++            }
++        });
++        Toast.makeText(HomeOfSystem.this,"Tap Image to refresh info fast from progress and history", Toast.LENGTH_LONG).show();
++    }
++    protected void refreshProgresFastInfo(){
++        int hkh = db.getProgresssHisCount(0);
++        TextView ko = (TextView)findViewById(R.id.progressTotal);
++        ko.setText("" + hkh + "");
++    }
++    protected void refreshHistoryFastInfo(){
++        int hkj = db.getProgresssHisCount(1);
++        TextView jo = (TextView)findViewById(R.id.historyTotal);
++        jo.setText("" + hkj + "");
++    }
++    public void addProgShow(){
++        addProg.setVisibility(View.VISIBLE);
++        addProg.animate().alpha(1.0f).setDuration(300).setListener(new AnimatorListenerAdapter() {
++            @Override
++            public void onAnimationEnd(Animator animation) {
++                super.onAnimationEnd(animation);
++                addProg.setVisibility(View.VISIBLE);
++            }
++        });
++    }
++    public void addProgHide(){
++        addProg.animate().alpha(0.0f).setDuration(300).setListener(new AnimatorListenerAdapter() {
++            @Override
++            public void onAnimationEnd(Animator animation) {
++                super.onAnimationEnd(animation);
++                addProg.setVisibility(View.GONE);
++            }
++        });
++    }
++
++
++    @Override
++    public void onBackPressed() {
++        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
++        if (drawer.isDrawerOpen(GravityCompat.START)) {
++            drawer.closeDrawer(GravityCompat.START);
++        } else {
++            super.onBackPressed();
++        }
++    }
++/*
++*
++    @Override
++    public boolean onCreateOptionsMenu(Menu menu) {
++        // Inflate the menu; this adds items to the action bar if it is present.
++        getMenuInflater().inflate(R.menu.home_of_system, menu);
++        return true;
++    }
++
++    @Override
++    public boolean onOptionsItemSelected(MenuItem item) {
++        // Handle action bar item clicks here. The action bar will
++        // automatically handle clicks on the Home/Up button, so long
++        // as you specify a parent activity in AndroidManifest.xml.
++        int id = item.getItemId();
++
++        //noinspection SimplifiableIfStatement
++        if (id == R.id.action_settings) {
++            return true;
++        }
++
++        return super.onOptionsItemSelected(item);
++    }
++* */
++
++    @SuppressWarnings("StatementWithEmptyBody")
++    @Override
++    public boolean onNavigationItemSelected(MenuItem item) {
++        // Handle navigation view item clicks here.
++        int id = item.getItemId();
++
++        if (id == R.id.home) {
++            showLayout(home);
++            fab.hide();
++            Toast.makeText(HomeOfSystem.this,"Tap Image to refresh info fast from progress and history", Toast.LENGTH_LONG).show();
++        } else if (id == R.id.history) {
++            showLayout(history);
++            fab.hide();
++        } else if (id == R.id.progress) {
++            showLayout(progress);
++            fab.show();
++        } else if (id == R.id.help) {
++            showLayout(help);
++            fab.hide();
++        }
++
++        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
++        drawer.closeDrawer(GravityCompat.START);
++        return true;
++    }
++    protected void homeSession(){
++
++    }
++}
+Index: app/src/main/res/drawable/side_nav_bar.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/drawable/side_nav_bar.xml	(revision )
++++ app/src/main/res/drawable/side_nav_bar.xml	(revision )
+@@ -0,0 +1,9 @@
++<shape xmlns:android="http://schemas.android.com/apk/res/android"
++    android:shape="rectangle">
++    <gradient
++        android:angle="135"
++        android:centerColor="#4CAF50"
++        android:endColor="#2E7D32"
++        android:startColor="#81C784"
++        android:type="linear" />
++</shape>
+\ No newline at end of file
+Index: app/src/test/java/com/jafar/jaservtech/system3pjagung/ExampleUnitTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/test/java/com/jafar/jaservtech/system3pjagung/ExampleUnitTest.java	(revision )
++++ app/src/test/java/com/jafar/jaservtech/system3pjagung/ExampleUnitTest.java	(revision )
+@@ -0,0 +1,15 @@
++package com.jafar.jaservtech.system3pjagung;
++
++import org.junit.Test;
++
++import static org.junit.Assert.*;
++
++/**
++ * To work on unit tests, switch the Test Artifact in the Build Variants view.
++ */
++public class ExampleUnitTest {
++    @Test
++    public void addition_isCorrect() throws Exception {
++        assertEquals(4, 2 + 2);
++    }
++}
+\ No newline at end of file
+Index: app/src/main/res/layout/activity_create_progress_default.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_create_progress_default.xml	(revision )
++++ app/src/main/res/layout/activity_create_progress_default.xml	(revision )
+@@ -0,0 +1,80 @@
++<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:tools="http://schemas.android.com/tools"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    android:gravity="center_horizontal"
++    android:orientation="vertical"
++    android:paddingBottom="@dimen/activity_vertical_margin"
++    android:paddingLeft="@dimen/activity_horizontal_margin"
++    android:paddingRight="@dimen/activity_horizontal_margin"
++    android:paddingTop="@dimen/activity_vertical_margin"
++    tools:context="com.jafar.jaservtech.system3pjagung.CreateProgressDefault">
++
++    <!-- Login progress -->
++    <ProgressBar
++        android:id="@+id/login_progress"
++        style="?android:attr/progressBarStyleLarge"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:layout_marginBottom="8dp"
++        android:visibility="gone" />
++
++    <ScrollView
++        android:id="@+id/login_form"
++        android:layout_width="match_parent"
++        android:layout_height="match_parent">
++
++        <LinearLayout
++            android:id="@+id/email_login_form"
++            android:layout_width="match_parent"
++            android:layout_height="wrap_content"
++            android:orientation="vertical">
++            <android.support.design.widget.TextInputLayout
++                android:layout_width="match_parent"
++                android:layout_height="wrap_content">
++                <EditText
++                    android:layout_width="match_parent"
++                    android:layout_height="wrap_content"
++                    android:hint="Nama progress"
++                    android:id="@+id/nama"
++                    android:inputType="text"
++                    android:singleLine="true"/>
++            </android.support.design.widget.TextInputLayout>
++            <android.support.design.widget.TextInputLayout
++                android:layout_width="match_parent"
++                android:layout_height="wrap_content">
++                <EditText
++                    android:layout_width="match_parent"
++                    android:layout_height="wrap_content"
++                    android:hint="Alamat progress"
++                    android:id="@+id/alamat"
++                    android:inputType="text"
++                    android:singleLine="true"/>
++            </android.support.design.widget.TextInputLayout>
++            <android.support.design.widget.TextInputLayout
++                android:layout_width="match_parent"
++                android:layout_height="wrap_content">
++
++                <EditText
++                    android:layout_width="match_parent"
++                    android:layout_height="wrap_content"
++                    android:hint="Informer"
++                    android:id="@+id/auth"
++                    android:inputType="text"
++                    android:maxLines="1"
++                    android:singleLine="true" />
++
++            </android.support.design.widget.TextInputLayout>
++
++            <Button
++                android:id="@+id/email_sign_in_button"
++                style="?android:textAppearanceSmall"
++                android:layout_width="match_parent"
++                android:layout_height="wrap_content"
++                android:layout_marginTop="16dp"
++                android:text="@string/action_sign_in"
++                android:textStyle="bold" />
++
++        </LinearLayout>
++    </ScrollView>
++</LinearLayout>
+Index: app/src/main/res/layout/button_show_list.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/button_show_list.xml	(revision )
++++ app/src/main/res/layout/button_show_list.xml	(revision )
+@@ -0,0 +1,28 @@
++<?xml version="1.0" encoding="utf-8"?>
++<LinearLayout
++    xmlns:android="http://schemas.android.com/apk/res/android"
++    android:layout_width="match_parent"
++       android:layout_weight="1"
++        android:orientation="vertical"
++        android:layout_height="match_parent">
++        <LinearLayout
++            android:gravity="center_vertical"
++            android:layout_width="match_parent"
++            android:layout_weight="1"
++            android:layout_height="match_parent">
++            <TextView
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:text="Nma Progrees"/>
++        </LinearLayout>
++        <LinearLayout
++            android:layout_weight="1"
++            android:gravity="center_vertical"
++            android:layout_width="match_parent"
++            android:layout_height="match_parent">
++            <TextView
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:text="0 total"/>
++        </LinearLayout>
++    </LinearLayout>
+\ No newline at end of file
+Index: app/src/main/res/values/dimens.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/values/dimens.xml	(revision )
++++ app/src/main/res/values/dimens.xml	(revision )
+@@ -0,0 +1,13 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources>
++    <dimen name="fab_margin">16dp</dimen>
++    <dimen name="app_bar_height">200dp</dimen>
++    <dimen name="item_width">200dp</dimen>
++    <dimen name="text_margin">16dp</dimen>
++    <!-- Default screen margins, per the Android Design guidelines. -->
++    <dimen name="nav_header_vertical_spacing">16dp</dimen>
++    <dimen name="nav_header_height">160dp</dimen>
++    <!-- Default screen margins, per the Android Design guidelines. -->
++    <dimen name="activity_horizontal_margin">16dp</dimen>
++    <dimen name="activity_vertical_margin">16dp</dimen>
++</resources>
+Index: app/src/main/res/layout/activity_checking_component_user.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_checking_component_user.xml	(revision )
++++ app/src/main/res/layout/activity_checking_component_user.xml	(revision )
+@@ -0,0 +1,38 @@
++<LinearLayout
++    android:layout_height="match_parent"
++    android:background="#bbffbb"
++    android:layout_width="match_parent"
++    android:gravity="center"
++    xmlns:android="http://schemas.android.com/apk/res/android"
++    android:orientation="vertical">
++    <LinearLayout
++        android:layout_width="match_parent"
++        android:layout_height="match_parent"
++        android:gravity="center"
++        android:layout_weight="1">
++        <ImageView
++            android:src="@drawable/corn"
++            android:layout_width="200dp"
++            android:layout_height="wrap_content" />
++
++    </LinearLayout>
++    <LinearLayout
++        android:layout_width="match_parent"
++        android:gravity="center"
++        android:layout_height="match_parent"
++        android:orientation="vertical"
++        android:layout_weight="2">
++        <ProgressBar
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:id="@+id/progressBar" />
++        <TextView
++            android:id="@+id/progressMessage"
++            android:layout_width="match_parent"
++            android:gravity="center"
++            android:text="Loading ..."
++            android:textColor="#f99922"
++            android:textSize="19sp"
++            android:layout_height="wrap_content" />
++    </LinearLayout>
++</LinearLayout>
+\ No newline at end of file
+Index: app/src/main/res/layout/activity_home_of_system.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_home_of_system.xml	(revision )
++++ app/src/main/res/layout/activity_home_of_system.xml	(revision )
+@@ -0,0 +1,25 @@
++<?xml version="1.0" encoding="utf-8"?>
++<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    xmlns:tools="http://schemas.android.com/tools"
++    android:id="@+id/drawer_layout"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    android:fitsSystemWindows="true"
++    tools:openDrawer="start">
++
++    <include
++        layout="@layout/app_bar_home_of_system"
++        android:layout_width="match_parent"
++        android:layout_height="match_parent" />
++
++    <android.support.design.widget.NavigationView
++        android:id="@+id/nav_view"
++        android:layout_width="wrap_content"
++        android:layout_height="match_parent"
++        android:layout_gravity="start"
++        android:fitsSystemWindows="true"
++        app:headerLayout="@layout/nav_header_home_of_system"
++        app:menu="@menu/activity_home_of_system_drawer" />
++
++</android.support.v4.widget.DrawerLayout>
+Index: app/src/main/res/layout/content_view_list.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/content_view_list.xml	(revision )
++++ app/src/main/res/layout/content_view_list.xml	(revision )
+@@ -0,0 +1,8 @@
++<?xml version="1.0" encoding="utf-8"?>
++<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    android:orientation="horizontal"
++    android:layout_width="match_parent"
++    android:layout_height="70dp"
++    >
++
++</LinearLayout>
+\ No newline at end of file
+Index: app/src/main/res/values/attrs.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/values/attrs.xml	(revision )
++++ app/src/main/res/values/attrs.xml	(revision )
+@@ -0,0 +1,12 @@
++<resources>
++
++    <!-- Declare custom theme attributes that allow changing which styles are
++         used for button bars depending on the API level.
++         ?android:attr/buttonBarStyle is new as of API 11 so this is
++         necessary to support previous API levels. -->
++    <declare-styleable name="ButtonBarContainerTheme">
++        <attr name="metaButtonBarStyle" format="reference" />
++        <attr name="metaButtonBarButtonStyle" format="reference" />
++    </declare-styleable>
++
++</resources>
+Index: app/src/main/res/drawable-v21/ic_menu_gallery.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/drawable-v21/ic_menu_gallery.xml	(revision )
++++ app/src/main/res/drawable-v21/ic_menu_gallery.xml	(revision )
+@@ -0,0 +1,9 @@
++<vector xmlns:android="http://schemas.android.com/apk/res/android"
++    android:width="24dp"
++    android:height="24dp"
++    android:viewportHeight="24.0"
++    android:viewportWidth="24.0">
++    <path
++        android:fillColor="#FF000000"
++        android:pathData="M22,16V4c0,-1.1 -0.9,-2 -2,-2H8c-1.1,0 -2,0.9 -2,2v12c0,1.1 0.9,2 2,2h12c1.1,0 2,-0.9 2,-2zm-11,-4l2.03,2.71L16,11l4,5H8l3,-4zM2,6v14c0,1.1 0.9,2 2,2h14v-2H4V6H2z" />
++</vector>
+Index: app/src/main/res/drawable-v21/ic_menu_share.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/drawable-v21/ic_menu_share.xml	(revision )
++++ app/src/main/res/drawable-v21/ic_menu_share.xml	(revision )
+@@ -0,0 +1,9 @@
++<vector xmlns:android="http://schemas.android.com/apk/res/android"
++    android:width="24dp"
++    android:height="24dp"
++    android:viewportHeight="24.0"
++    android:viewportWidth="24.0">
++    <path
++        android:fillColor="#FF000000"
++        android:pathData="M18,16.08c-0.76,0 -1.44,0.3 -1.96,0.77L8.91,12.7c0.05,-0.23 0.09,-0.46 0.09,-0.7s-0.04,-0.47 -0.09,-0.7l7.05,-4.11c0.54,0.5 1.25,0.81 2.04,0.81 1.66,0 3,-1.34 3,-3s-1.34,-3 -3,-3 -3,1.34 -3,3c0,0.24 0.04,0.47 0.09,0.7L8.04,9.81C7.5,9.31 6.79,9 6,9c-1.66,0 -3,1.34 -3,3s1.34,3 3,3c0.79,0 1.5,-0.31 2.04,-0.81l7.12,4.16c-0.05,0.21 -0.08,0.43 -0.08,0.65 0,1.61 1.31,2.92 2.92,2.92 1.61,0 2.92,-1.31 2.92,-2.92s-1.31,-2.92 -2.92,-2.92z" />
++</vector>
+Index: app/src/main/res/values/drawables.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/values/drawables.xml	(revision )
++++ app/src/main/res/values/drawables.xml	(revision )
+@@ -0,0 +1,8 @@
++<resources xmlns:android="http://schemas.android.com/apk/res/android">
++    <item name="ic_menu_camera" type="drawable">@android:drawable/ic_menu_camera</item>
++    <item name="ic_menu_gallery" type="drawable">@android:drawable/ic_menu_gallery</item>
++    <item name="ic_menu_slideshow" type="drawable">@android:drawable/ic_menu_slideshow</item>
++    <item name="ic_menu_manage" type="drawable">@android:drawable/ic_menu_manage</item>
++    <item name="ic_menu_share" type="drawable">@android:drawable/ic_menu_share</item>
++    <item name="ic_menu_send" type="drawable">@android:drawable/ic_menu_send</item>
++</resources>
+Index: app/src/main/java/com/jafar/jaservtech/system3pjagung/dummy/DummyContent.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/jafar/jaservtech/system3pjagung/dummy/DummyContent.java	(revision )
++++ app/src/main/java/com/jafar/jaservtech/system3pjagung/dummy/DummyContent.java	(revision )
+@@ -0,0 +1,72 @@
++package com.jafar.jaservtech.system3pjagung.dummy;
++
++import java.util.ArrayList;
++import java.util.HashMap;
++import java.util.List;
++import java.util.Map;
++
++/**
++ * Helper class for providing sample content for user interfaces created by
++ * Android template wizards.
++ * <p/>
++ * TODO: Replace all uses of this class before publishing your app.
++ */
++public class DummyContent {
++
++    /**
++     * An array of sample (dummy) items.
++     */
++    public static final List<DummyItem> ITEMS = new ArrayList<DummyItem>();
++
++    /**
++     * A map of sample (dummy) items, by ID.
++     */
++    public static final Map<String, DummyItem> ITEM_MAP = new HashMap<String, DummyItem>();
++
++    private static final int COUNT = 25;
++
++    static {
++        // Add some sample items.
++        for (int i = 1; i <= COUNT; i++) {
++            addItem(createDummyItem(i));
++        }
++    }
++
++    private static void addItem(DummyItem item) {
++        ITEMS.add(item);
++        ITEM_MAP.put(item.id, item);
++    }
++
++    private static DummyItem createDummyItem(int position) {
++        return new DummyItem(String.valueOf(position), "Item " + position, makeDetails(position));
++    }
++
++    private static String makeDetails(int position) {
++        StringBuilder builder = new StringBuilder();
++        builder.append("Details about Item: ").append(position);
++        for (int i = 0; i < position; i++) {
++            builder.append("\nMore details information here.");
++        }
++        return builder.toString();
++    }
++
++    /**
++     * A dummy item representing a piece of content.
++     */
++    public static class DummyItem {
++        public final String id;
++        public final String content;
++        public final String details;
++
++        public DummyItem(String id, String content, String details) {
++            this.id = id;
++            this.content = content;
++            this.details = details;
++        }
++
++        @Override
++        public String toString() {
++            return content;
++        }
++    }
++}
+Index: app/src/main/res/values/strings.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/values/strings.xml	(revision )
++++ app/src/main/res/values/strings.xml	(revision )
+@@ -0,0 +1,30 @@
++<resources>
++    <string name="app_name">System 3P Jagung</string>
++
++    <string name="dummy_button">Dummy Button</string>
++    <string name="dummy_content">DUMMY\nCONTENT</string>
++    <string name="checking_component_label">System 3P</string>
++    <string name="title_beranda_list">Info</string>
++    <string name="title_beranda_detail">Beranda Detail</string>
++    <string name="title_activity_home_of_system">HomeOfSystem</string>
++
++    <string name="navigation_drawer_open">Open navigation drawer</string>
++    <string name="navigation_drawer_close">Close navigation drawer</string>
++
++    <string name="action_settings">Settings</string>
++    <string name="title_activity_create_progress_default">Progress</string>
++
++    <!-- Strings related to login -->
++    <string name="prompt_email">Email</string>
++    <string name="prompt_password">Password (optional)</string>
++    <string name="action_sign_in">Selesai</string>
++    <string name="action_sign_in_short">Sign in</string>
++    <string name="error_invalid_email">This email address is invalid</string>
++    <string name="error_invalid_password">This password is too short</string>
++    <string name="error_incorrect_password">This password is incorrect</string>
++    <string name="error_field_required">This field is required</string>
++    <string name="permission_rationale">"Contacts permissions are needed for providing email
++        completions."
++    </string>
++    <string name="title_activity_create_progress_next">Progress</string>
++</resources>
+Index: app/src/main/res/values-v21/styles.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/values-v21/styles.xml	(revision )
++++ app/src/main/res/values-v21/styles.xml	(revision )
+@@ -0,0 +1,8 @@
++<resources>
++    <style name="AppTheme.NoActionBar">
++        <item name="windowActionBar">false</item>
++        <item name="windowNoTitle">true</item>
++        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
++        <item name="android:statusBarColor">#293</item>
++    </style>
++</resources>
+Index: app/src/main/res/layout/nav_header_home_of_system.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/nav_header_home_of_system.xml	(revision )
++++ app/src/main/res/layout/nav_header_home_of_system.xml	(revision )
+@@ -0,0 +1,47 @@
++<?xml version="1.0" encoding="utf-8"?>
++<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    android:layout_width="match_parent"
++    android:layout_height="@dimen/nav_header_height"
++    android:background="#235622"
++    android:gravity="bottom"
++    android:orientation="vertical"
++    android:paddingBottom="@dimen/activity_vertical_margin"
++    android:paddingLeft="@dimen/activity_horizontal_margin"
++    android:paddingRight="@dimen/activity_horizontal_margin"
++    android:paddingTop="@dimen/activity_vertical_margin"
++    android:theme="@style/ThemeOverlay.AppCompat.Light">
++    <LinearLayout
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:layout_weight="1"
++        >
++        <ImageView
++        android:id="@+id/imageView"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:paddingTop="@dimen/nav_header_vertical_spacing"
++        android:src="@drawable/corn"
++            android:contentDescription="Image title" />
++    </LinearLayout>
++
++
++    <TextView
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:paddingTop="3dp"
++        android:textSize="13sp"
++        android:textColor="#fff"
++        android:gravity="center"
++        android:text="Sistem 3P Jagung "
++        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
++
++    <TextView
++        android:id="@+id/textView"
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:paddingTop="2sp"
++        android:textColor="#fff"
++        android:textSize="7sp"
++        android:gravity="center"
++        android:text="(Pemantau, Pendata dan Penyiram)" />
++</LinearLayout>
+Index: app/src/main/res/layout/content_home_of_system.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/content_home_of_system.xml	(revision )
++++ app/src/main/res/layout/content_home_of_system.xml	(revision )
+@@ -0,0 +1,258 @@
++<?xml version="1.0" encoding="utf-8"?>
++<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    xmlns:tools="http://schemas.android.com/tools"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    android:paddingBottom="@dimen/activity_vertical_margin"
++    android:paddingLeft="@dimen/activity_horizontal_margin"
++    android:paddingRight="@dimen/activity_horizontal_margin"
++    android:paddingTop="@dimen/activity_vertical_margin"
++    app:layout_behavior="@string/appbar_scrolling_view_behavior"
++    tools:context="com.jafar.jaservtech.system3pjagung.HomeOfSystem"
++    tools:showIn="@layout/app_bar_home_of_system">
++    <RelativeLayout
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:id="@+id/home_layout"
++        android:visibility="visible">
++        <LinearLayout
++            android:layout_width="match_parent"
++            android:layout_height="match_parent"
++            android:gravity="center"
++            android:orientation="vertical">
++            <LinearLayout
++                android:layout_width="match_parent"
++                android:layout_height="match_parent"
++                android:orientation="horizontal"
++                android:gravity="center"
++                android:layout_weight="1"
++                android:baselineAligned="false">
++                <LinearLayout
++                    android:layout_width="match_parent"
++                    android:layout_weight="1"
++                    android:gravity="center"
++                    android:padding="10dp"
++                    android:layout_height="match_parent">
++                    <ImageView
++                        android:id="@+id/refreshProgressFastInfo"
++                        android:layout_width="match_parent"
++                        android:layout_height="wrap_content"
++                        android:src="@drawable/progress"/>
++                </LinearLayout>
++                <LinearLayout
++                    android:layout_width="match_parent"
++                    android:layout_weight="1"
++                    android:gravity="center"
++                    android:layout_height="match_parent">
++                    <RelativeLayout
++                        android:layout_width="match_parent"
++                        android:gravity="center"
++                        android:padding="10dp"
++                        android:layout_height="match_parent">
++                        <TextView
++                            android:layout_width="match_parent"
++                            android:layout_height="wrap_content"
++                            android:textAppearance="?android:attr/textAppearanceLarge"
++                            android:textSize="60sp"
++                            android:gravity="center"
++                            android:foregroundGravity="center"
++                            android:textAlignment="center"
++                            android:text="45"
++                            android:id="@+id/progressTotal" />
++                        <TextView
++                            android:layout_below="@+id/progressTotal"
++                            android:layout_width="match_parent"
++                            android:layout_height="wrap_content"
++                            android:textAlignment="center"
++                            android:gravity="center"
++                            android:foregroundGravity="center"
++                            android:text="Progress"
++                            android:textSize="30sp"/>
++                    </RelativeLayout>
++                </LinearLayout>
++            </LinearLayout>
++            <LinearLayout
++                android:layout_width="match_parent"
++                android:layout_height="match_parent"
++                android:orientation="horizontal"
++                android:gravity="center"
++                android:layout_weight="1"
++                android:baselineAligned="false">
++                <LinearLayout
++                    android:layout_width="match_parent"
++                    android:layout_weight="1"
++                    android:gravity="center"
++                    android:padding="10dp"
++                    android:layout_height="match_parent">
++                    <ImageView
++                        android:id="@+id/refreshHistoryFastInfo"
++                        android:layout_width="match_parent"
++                        android:layout_height="wrap_content"
++                        android:src="@drawable/history"/>
++                </LinearLayout>
++                <LinearLayout
++                    android:layout_width="match_parent"
++                    android:layout_weight="1"
++                    android:gravity="center"
++                    android:layout_height="match_parent">
++                    <RelativeLayout
++                        android:layout_width="match_parent"
++                        android:gravity="center"
++                        android:padding="10dp"
++                        android:layout_height="match_parent">
++                        <TextView
++                            android:layout_width="match_parent"
++                            android:layout_height="wrap_content"
++                            android:textAppearance="?android:attr/textAppearanceLarge"
++                            android:textSize="60sp"
++                            android:textAlignment="center"
++                            android:gravity="center"
++                            android:foregroundGravity="center"
++                            android:text="45"
++                            android:id="@+id/historyTotal" />
++                        <TextView
++                            android:layout_below="@+id/historyTotal"
++                            android:layout_width="match_parent"
++                            android:layout_height="wrap_content"
++                            android:textAlignment="center"
++                            android:gravity="center"
++                            android:foregroundGravity="center"
++                            android:text="History"
++                            android:textSize="30sp"/>
++                    </RelativeLayout>
++                </LinearLayout>
++            </LinearLayout>
++        </LinearLayout>
++    </RelativeLayout>
++    <RelativeLayout
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:id="@+id/progress_layout"
++        android:visibility="invisible">
++        <ScrollView
++            android:layout_width="match_parent"
++            android:layout_height="match_parent">
++            <LinearLayout
++                android:layout_width="match_parent"
++                android:layout_height="match_parent"
++                android:id="@+id/viewerProgress"
++                android:orientation="vertical"
++                >
++                 <!-- -->
++            </LinearLayout>
++        </ScrollView>
++        <RelativeLayout
++            android:layout_width="match_parent"
++            android:id="@+id/optionCreateProgress"
++            android:background="#fff"
++            android:visibility="gone"
++            android:alpha="0"
++            android:animateLayoutChanges="true"
++            android:layout_height="match_parent">
++            <LinearLayout
++                android:layout_width="match_parent"
++                android:layout_height="match_parent"
++                android:orientation="vertical">
++                <LinearLayout
++                    android:layout_width="match_parent"
++                    android:layout_height="match_parent"
++                    android:layout_weight="1"
++                    android:orientation="horizontal">
++                    <LinearLayout
++                        android:layout_width="match_parent"
++                        android:layout_height="match_parent"
++                        android:gravity="center"
++                        android:layout_weight="1">
++                        <ImageView
++                            android:paddingRight="10dp"
++                            android:paddingLeft="10dp"
++                            android:layout_width="wrap_content"
++                            android:layout_height="wrap_content"
++                            android:id="@+id/newProgress"
++                            android:src="@drawable/cpnew"/>
++                    </LinearLayout>
++                    <LinearLayout
++                        android:layout_width="match_parent"
++                        android:layout_height="match_parent"
++                        android:gravity="center"
++                        android:layout_weight="1">
++                        <ImageView
++                            android:id="@+id/nextProgress"
++                            android:paddingRight="10dp"
++                            android:paddingLeft="10dp"
++                            android:layout_width="wrap_content"
++                            android:layout_height="wrap_content"
++                            android:src="@drawable/cpnext"/>
++                    </LinearLayout>
++                </LinearLayout>
++                <LinearLayout
++                    android:layout_width="match_parent"
++                    android:layout_height="match_parent"
++                    android:layout_weight="4"
++                    android:gravity="center">
++                    <ImageView
++                        android:id="@+id/outProgress"
++                        android:paddingBottom="10dp"
++                        android:paddingTop="10dp"
++                        android:layout_width="wrap_content"
++                        android:layout_height="wrap_content"
++                        android:src="@drawable/back"/>
++                </LinearLayout>
++            </LinearLayout>
++        </RelativeLayout>
++    </RelativeLayout>
++    <RelativeLayout
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:visibility="invisible"
++        android:id="@+id/history_layout">
++        <ScrollView
++            android:layout_width="match_parent"
++            android:layout_height="match_parent">
++            <LinearLayout
++                android:layout_width="match_parent"
++                android:layout_height="match_parent"
++                android:id="@+id/viewerHistory"
++                android:orientation="vertical"
++                >
++                <LinearLayout
++                    android:layout_width="match_parent"
++                    android:layout_height="wrap_content"
++                    >
++                    <TextView
++                        android:layout_width="match_parent"
++                        android:layout_height="wrap_content"
++                        android:text="Hello"/>
++                </LinearLayout>
++            </LinearLayout>
++        </ScrollView>
++    </RelativeLayout>
++    <RelativeLayout
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:visibility="invisible"
++        android:id="@+id/help_layout">
++        <ScrollView
++            android:layout_width="match_parent"
++            android:layout_height="match_parent">
++            <LinearLayout
++                android:layout_width="match_parent"
++                android:layout_height="wrap_content"
++                android:id="@+id/viewerHelp"
++                android:orientation="vertical"
++                >
++                <LinearLayout
++                    android:layout_width="match_parent"
++                    android:layout_height="wrap_content"
++                    >
++                    <TextView
++                        android:layout_width="match_parent"
++                        android:layout_height="wrap_content"
++                        android:text="Hello"/>
++                </LinearLayout>
++            </LinearLayout>
++        </ScrollView>
++    </RelativeLayout>
++</RelativeLayout>
++
+Index: app/src/main/res/layout/button_delete_list.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/button_delete_list.xml	(revision )
++++ app/src/main/res/layout/button_delete_list.xml	(revision )
+@@ -0,0 +1,13 @@
++<?xml version="1.0" encoding="utf-8"?>
++<LinearLayout
++xmlns:android="http://schemas.android.com/apk/res/android"
++android:layout_width="match_parent"
++android:layout_weight="5"
++android:gravity="center"
++android:layout_height="match_parent">
++<ImageView
++    android:background="#fff"
++    android:src="@android:drawable/ic_menu_delete"
++    android:layout_width="wrap_content"
++    android:layout_height="wrap_content" />
++</LinearLayout>
+\ No newline at end of file
+Index: app/.gitignore
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/.gitignore	(revision )
++++ app/.gitignore	(revision )
+@@ -0,0 +1,1 @@
++/build
+Index: app/src/main/java/com/jafar/jaservtech/system3pjagung/CreateProgressNext.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/jafar/jaservtech/system3pjagung/CreateProgressNext.java	(revision )
++++ app/src/main/java/com/jafar/jaservtech/system3pjagung/CreateProgressNext.java	(revision )
+@@ -0,0 +1,285 @@
++package com.jafar.jaservtech.system3pjagung;
++
++import android.animation.Animator;
++import android.animation.AnimatorListenerAdapter;
++import android.annotation.TargetApi;
++import android.os.Build;
++import android.os.Bundle;
++import android.support.v7.app.AppCompatActivity;
++import android.view.MenuItem;
++import android.view.View;
++import android.view.View.OnClickListener;
++import android.widget.AutoCompleteTextView;
++import android.widget.Button;
++import android.widget.DatePicker;
++import android.widget.EditText;
++import android.widget.RelativeLayout;
++import android.widget.Toast;
++
++import com.jafar.jaservtech.system3pjagung.dummy.DBHandler;
++import com.jafar.jaservtech.system3pjagung.dummy.JaservTechFilter;
++import com.jafar.jaservtech.system3pjagung.dummy.Progress;
++
++import java.text.SimpleDateFormat;
++import java.util.Date;
++
++/**
++ * A login screen that offers login via email/password.
++ */
++public class CreateProgressNext extends AppCompatActivity {
++
++
++    // UI references.
++    private AutoCompleteTextView mEmailView;
++    private EditText mPasswordView,startProg;
++    private EditText nama, alamat,informer;
++    RelativeLayout showCalendar;
++    private View mProgressView;
++    private View mLoginFormView;
++    private DatePicker datePick;
++    private Button dateTimePick,input;
++    private void initializing(){
++        this.mProgressView = (View)findViewById(R.id.login_progress);
++        this.mLoginFormView = (View)findViewById(R.id.login_form);
++        this.input = (Button)findViewById(R.id.email_sign_in_button);
++        this.input.setOnClickListener(new OnClickListener() {
++            @Override
++            public void onClick(View v) {
++                attemptLogin();
++            }
++        });
++        this.datePick = (DatePicker)findViewById(R.id.datePicker);
++        this.datePick.setSpinnersShown(true);
++        this.datePick.setCalendarViewShown(false);
++        this.dateTimePick = (Button)findViewById(R.id.pilihDateTimePicker);
++        this.dateTimePick.setOnClickListener(new OnClickListener() {
++            @Override
++            public void onClick(View v) {
++                Date temp = new Date();
++                SimpleDateFormat hY = new SimpleDateFormat("yyyy");
++                SimpleDateFormat hM = new SimpleDateFormat("MM");
++                SimpleDateFormat hD = new SimpleDateFormat("dd");
++                int Y = Integer.parseInt(hY.format(temp));
++                int m = Integer.parseInt(hM.format(temp));
++                int d = Integer.parseInt(hD.format(temp));
++                int error = 0;
++                int Ys = datePick.getYear();
++                int ms = datePick.getMonth()+1;
++                int ds = datePick.getDayOfMonth();
++                if(Ys > Y){
++                    error++;
++                }else if(Ys == Y){
++                    if(ms > m){
++                        error++;
++                    }else if(ms == m){
++                        if(ds > d)
++                            error++;
++                        else if(ds == d){
++                            error++;
++                        }
++                    }
++                }
++                if(error > 0){
++                    Toast.makeText(CreateProgressNext.this,"Tanggal anda tidak sesuai dengan kriteria masa lampau",Toast.LENGTH_LONG).show();
++                }else{
++                    startProg.setText(Ys+"-"+ms+"-"+ds);
++                    Toast.makeText(CreateProgressNext.this,"Tanggal berhasil dimasukan",Toast.LENGTH_LONG).show();
++                    showCalendar.animate().alpha(0).setDuration(600).setListener(new AnimatorListenerAdapter() {
++                        @Override
++                        public void onAnimationEnd(Animator animation) {
++                            super.onAnimationEnd(animation);
++                            showCalendar.setVisibility(View.GONE);
++                        }
++                    });
++                }
++            }
++        });
++        startProg = (EditText)findViewById(R.id.startProgress);
++        showCalendar = (RelativeLayout)findViewById(R.id.showCalendar);
++        startProg.setOnClickListener(new OnClickListener() {
++            @Override
++            public void onClick(View v) {
++                showCalendar.setVisibility(View.VISIBLE);
++                showCalendar.animate().alpha(1f).setDuration(600).setListener(new AnimatorListenerAdapter() {
++                    @Override
++                    public void onAnimationEnd(Animator animation) {
++                        super.onAnimationEnd(animation);
++                        showCalendar.setVisibility(View.VISIBLE);
++                    }
++                });
++            }
++        });
++        nama = (EditText)findViewById(R.id.namaProgress);
++        alamat = (EditText)findViewById(R.id.alamatProgress);
++        informer = (EditText)findViewById(R.id.informerProgress);
++    }
++    @Override
++    protected void onCreate(Bundle savedInstanceState) {
++        super.onCreate(savedInstanceState);
++        setContentView(R.layout.activity_create_progress_next);
++        initializing();
++    }
++
++    /**
++     * Callback received when a permissions request has been completed.
++     */
++
++    /**
++     * Attempts to sign in or register the account specified by the login form.
++     * If there are form errors (invalid email, missing fields, etc.), the
++     * errors are presented and no actual login attempt is made.
++     */
++    private void attemptLogin() {
++
++        boolean cancel = false;
++        View focusView = null;
++        nama.setError(null);
++        alamat.setError(null);
++        informer.setError(null);
++        String namaS = nama.getText().toString();
++        String alamatS = alamat.getText().toString();
++        String informerS = informer.getText().toString();
++        if(JaservTechFilter.isEmpty(namaS)){
++            nama.setError("Nama progress Wajib diisi");
++            cancel = true;
++            focusView = nama;
++        }else if(!JaservTechFilter.isNameFieldValid(namaS)){
++            nama.setError("hanya : (A-Z a-z)");
++            cancel = true;
++            focusView = nama;
++        }else  if(JaservTechFilter.isContainMoreSpace(namaS)){
++            nama.setError("mengandung double spasi");
++            focusView = nama;
++            cancel = true;
++        }
++        if(JaservTechFilter.isEmpty(alamatS)){
++            alamat.setError("Lokasi Ladang wajib diisi");
++            cancel = true;
++            if(focusView == null){
++                focusView = alamat;
++            }
++        }else if(!JaservTechFilter.isAddressValid(alamatS)){
++            alamat.setError("hanya : (A-Z,a-z.0-9)");
++            cancel = true;
++            if(focusView == null){
++                focusView = alamat;
++            }
++        }else if(JaservTechFilter.isContainMoreSpace(alamatS)){
++            alamat.setError("mengandung double spasi");
++            cancel = true;
++            if(focusView == null){
++                focusView = alamat;
++            }
++        }
++
++        if(JaservTechFilter.isEmpty(informerS)){
++            informer.setError("Nama penanggung jawab progress wajib diisi");
++            cancel = true;
++            if(focusView == null){
++                focusView = informer;
++            }
++        }else if(!JaservTechFilter.isNameValid(informerS)){
++            informer.setError("hanya : (A-Z,a-z.0-9)");
++            cancel = true;
++            if(focusView == null){
++                focusView = informer;
++            }
++        }else if(JaservTechFilter.isContainMoreSpace(informerS)){
++            informer.setError("mengandung double spasi");
++            cancel = true;
++            if(focusView == null){
++                focusView = informer;
++            }
++        }
++        startProg.setError(null);
++        String startProgS = startProg.getText().toString();
++        if(JaservTechFilter.isEmpty(startProgS)){
++            startProg.setError("Tanggal start belum dimasukan");
++            cancel = true;
++            if (focusView == null){}
++        }
++
++        if (cancel) {
++            // There was an error; don't attempt login and focus the first
++            // form field with an error.
++            focusView.requestFocus();
++        } else {
++            try{
++                showProgress(true);
++                Thread.sleep(3000);
++            }catch (InterruptedException e){
++
++            }
++            Date h = new Date();
++            SimpleDateFormat jj = new SimpleDateFormat("yyyy.MM.dd");
++            Progress s = new Progress();
++            s.setId(jj.format(h) + "" + informerS.charAt(0) + "" + alamatS.charAt(2) + "" + namaS.charAt(5));
++            s.setName(namaS);
++            s.setAddress(alamatS);
++            s.setAuth(informerS);
++            s.setCat(2);
++            s.setPercentage(0);
++            s.setFinish(0);
++            s.setStartDate(startProgS);
++            s.setEndDate("");
++            DBHandler hjk = new DBHandler(CreateProgressNext.this);
++            if(hjk.addProgress(s)){
++                try{
++                    Toast.makeText(CreateProgressNext.this, "Data berhasil dimasukan", Toast.LENGTH_SHORT);
++                    Thread.sleep(3000);
++                }catch(InterruptedException e){
++
++                }finally {
++                    finish();
++                }
++            }
++
++        }
++    }
++    /**
++     * Shows the progress UI and hides the login form.
++     */
++    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
++    private void showProgress(final boolean show) {
++        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
++        // for very easy animations. If available, use these APIs to fade-in
++        // the progress spinner.
++        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
++            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
++
++            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
++            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
++                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
++                @Override
++                public void onAnimationEnd(Animator animation) {
++                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
++                }
++            });
++
++            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
++            mProgressView.animate().setDuration(shortAnimTime).alpha(
++                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
++                @Override
++                public void onAnimationEnd(Animator animation) {
++                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
++                }
++            });
++        } else {
++            // The ViewPropertyAnimator APIs are not available, so simply show
++            // and hide the relevant UI components.
++            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
++            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
++        }
++    }
++
++    @Override
++    public boolean onOptionsItemSelected(MenuItem item){
++        switch(item.getItemId()){
++            case android.R.id.home :
++                finish();
++                return true;
++        }
++        return super.onOptionsItemSelected(item);
++    }
++}
++
+Index: app/src/main/java/com/jafar/jaservtech/system3pjagung/dummy/JaservTechFilter.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/jafar/jaservtech/system3pjagung/dummy/JaservTechFilter.java	(revision )
++++ app/src/main/java/com/jafar/jaservtech/system3pjagung/dummy/JaservTechFilter.java	(revision )
+@@ -0,0 +1,100 @@
++package com.jafar.jaservtech.system3pjagung.dummy;
++
++/**
++ * Created by Jafar on 4/9/2016.
++ */
++public class JaservTechFilter {
++    public static boolean isEmpty(String nama){
++        return (nama.length() ==0);
++    }
++    public static boolean isNameValid(String nama){
++        int jk;
++        for(int i = 0; i<nama.length();i++){
++            jk = (int)nama.charAt(i);
++            if(jk < 65 ){
++                if(jk != 32)
++                    if(jk != 39)
++                        return false;
++            }else if(jk > 90){
++                if(jk <97)
++                    return false;
++                else if(jk > 122)
++                    return false;
++            }
++        }
++        return true;
++    }
++    public static boolean isNameFieldValid(String nama){
++        int jk;
++        for(int i = 0; i<nama.length();i++){
++            jk = (int)nama.charAt(i);
++            if(jk < 65 ){
++                if (jk < 48){
++                    if(jk != 32)
++                        return false;
++                }else if(jk > 57){
++                    return false;
++                }
++            }else if(jk > 90){
++                if(jk <97)
++                    return false;
++                else if(jk > 122)
++                    return false;
++            }
++        }
++        return true;
++    }
++    public static boolean isAddressValid(String address){
++        int jk;
++        for(int i = 0; i<address.length();i++){
++            jk = (int)address.charAt(i);
++            if(jk < 65 ){
++                if(jk < 48){
++                    if(jk != 32)
++                        if (jk != 46)
++                            if(jk != 44)
++                                return false;
++                }else if(jk > 57) {
++                    return false;
++                }
++            }else if(jk > 90){
++                if(jk <97)
++                    return false;
++                else if(jk > 122)
++                    return false;
++            }
++        }
++        return true;
++    }
++    public static boolean isContainMoreSpace(String nama){
++        nama+="";
++        int com,k;
++        int error=0;
++        for(int i=0;i<nama.length();i++){
++            if((int)nama.charAt(i) == 32){
++                com=0;
++                for(k=i+1;k<nama.length();k++){
++                    if((int)nama.charAt(k) == 32)
++                    {
++                        com++;
++                    }
++                    else{
++                        i=k-1;
++                        if(com>0)
++                            error++;
++                        break;
++                    }
++                }
++                if(k == nama.length()){
++                    if(com>0)
++                        error++;
++                }
++            }
++        }
++        if(error > 0){
++            return true;
++        }else{
++            return false;
++        }
++    }
++}
+Index: app/src/main/res/layout/acc_content.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/acc_content.xml	(revision )
++++ app/src/main/res/layout/acc_content.xml	(revision )
+@@ -0,0 +1,11 @@
++<?xml version="1.0" encoding="utf-8"?>
++<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    android:orientation="horizontal"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent">
++    <ImageButton
++        android:layout_width="match_parent"
++        android:layout_height="50dp"
++        android:src="@drawable/corn"
++         />
++</LinearLayout>
+\ No newline at end of file
+Index: app/src/main/java/com/jafar/jaservtech/system3pjagung/dummy/Progress.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/jafar/jaservtech/system3pjagung/dummy/Progress.java	(revision )
++++ app/src/main/java/com/jafar/jaservtech/system3pjagung/dummy/Progress.java	(revision )
+@@ -0,0 +1,83 @@
++package com.jafar.jaservtech.system3pjagung.dummy;
++
++import java.text.SimpleDateFormat;
++import java.util.Date;
++
++/**
++ * Created by Jafar on 4/5/2016.
++ */
++public class Progress {
++
++    private String id; //id progress
++    private String name; //nama progress
++    private String address; //lokasi progress
++    private int percentage; //persentase of progress
++    private String startDate; //tanggal mulai progress format dd-mm-yy hh-a-s
++    private String endDate; //tanggal mulai progress format dd-mm-yy hh-a-s
++    private int finish; //status progress telah selesai 0 sedang berjalan, 1 telah selesai
++    private int cat;//kategori dari awal atau melanjutkan
++    private String auth; //penanggung jawab progress
++    //private function
++    private void generateIdProgress(){
++        Date h = new Date();
++        SimpleDateFormat j = new SimpleDateFormat("yyyyMMddhhmm");
++       this.id = j.format(h);
++    }
++    private void initializing(){
++        this.generateIdProgress();
++        this.finish = 0;
++        this.percentage = 0;
++    }
++    //constructor
++    public Progress()
++    {
++        this.initializing();
++    }
++    public Progress(String nama,String add, int percen,String aut, String start){
++        this.initializing();
++        this.name = nama;
++        this.address = add;
++        this.percentage = percen;
++        this.auth = aut;
++        this.startDate = start;
++    }
++    //setter
++    public void setId(String id) {
++        this.id = id;
++    }
++    public void setName(String name) {
++        this.name = name;
++    }
++    public void setAddress(String address) { this.address = address; }
++    public void setPercentage(int percen){ this.percentage = percen;}
++    public void setStartDate(String start){this.startDate = start;}
++    public void setEndDate(String end){this.endDate = end;}
++    public void setFinish(int fins){ this.finish = fins;}
++    public void setAuth(String aut){ this.auth = aut;}
++    public void setCat(int s){this.cat = s;}
++
++    //getter
++    public String getId() { return id; }
++    public String getAddress() {
++        return address;
++    }
++    public String getName() {
++        return name;
++    }
++    public int getPercentage(){
++        return percentage;
++    }
++    public int getFinish(){
++        return finish;
++    }
++    public String getStartDate(){
++        return startDate;
++    }
++    public String getEndDate(){
++        return endDate;
++    }
++    public String getAuth(){
++        return auth;
++    }
++    public int getCat(){return cat;}
++}
+\ No newline at end of file
+Index: app/src/main/res/drawable-v21/ic_menu_slideshow.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/drawable-v21/ic_menu_slideshow.xml	(revision )
++++ app/src/main/res/drawable-v21/ic_menu_slideshow.xml	(revision )
+@@ -0,0 +1,9 @@
++<vector xmlns:android="http://schemas.android.com/apk/res/android"
++    android:width="24dp"
++    android:height="24dp"
++    android:viewportHeight="24.0"
++    android:viewportWidth="24.0">
++    <path
++        android:fillColor="#FF000000"
++        android:pathData="M4,6H2v14c0,1.1 0.9,2 2,2h14v-2H4V6zm16,-4H8c-1.1,0 -2,0.9 -2,2v12c0,1.1 0.9,2 2,2h12c1.1,0 2,-0.9 2,-2V4c0,-1.1 -0.9,-2 -2,-2zm-8,12.5v-9l6,4.5 -6,4.5z" />
++</vector>
+Index: app/src/main/res/values/ids.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/values/ids.xml	(revision )
++++ app/src/main/res/values/ids.xml	(revision )
+@@ -0,0 +1,4 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources>
++    <item name="newSS" type="id" value="30"/>
++</resources>
+\ No newline at end of file
+Index: app/src/main/res/drawable-v21/ic_menu_camera.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/drawable-v21/ic_menu_camera.xml	(revision )
++++ app/src/main/res/drawable-v21/ic_menu_camera.xml	(revision )
+@@ -0,0 +1,12 @@
++<vector xmlns:android="http://schemas.android.com/apk/res/android"
++    android:width="24dp"
++    android:height="24dp"
++    android:viewportHeight="24.0"
++    android:viewportWidth="24.0">
++    <path
++        android:fillColor="#FF000000"
++        android:pathData="M12,12m-3.2,0a3.2,3.2 0,1 1,6.4 0a3.2,3.2 0,1 1,-6.4 0" />
++    <path
++        android:fillColor="#FF000000"
++        android:pathData="M9,2L7.17,4H4c-1.1,0 -2,0.9 -2,2v12c0,1.1 0.9,2 2,2h16c1.1,0 2,-0.9 2,-2V6c0,-1.1 -0.9,-2 -2,-2h-3.17L15,2H9zm3,15c-2.76,0 -5,-2.24 -5,-5s2.24,-5 5,-5 5,2.24 5,5 -2.24,5 -5,5z" />
++</vector>
+Index: app/src/main/res/values/styles.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/values/styles.xml	(revision )
++++ app/src/main/res/values/styles.xml	(revision )
+@@ -0,0 +1,32 @@
++<resources>
++
++    <!-- Base application theme. -->
++    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
++        <!-- Customize your theme here. -->
++        <item name="colorPrimary">@color/colorPrimary</item>
++        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
++        <item name="colorAccent">@color/colorAccent</item>
++    </style>
++
++    <style name="FullscreenTheme" parent="AppTheme">
++        <item name="android:actionBarStyle">@style/FullscreenActionBarStyle</item>
++        <item name="android:windowActionBarOverlay">true</item>
++        <item name="android:windowBackground">@null</item>
++        <item name="metaButtonBarStyle">?android:attr/buttonBarStyle</item>
++        <item name="metaButtonBarButtonStyle">?android:attr/buttonBarButtonStyle</item>
++    </style>
++
++    <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
++        <item name="android:background">@color/black_overlay</item>
++    </style>
++
++    <style name="AppTheme.NoActionBar">
++        <item name="windowActionBar">false</item>
++        <item name="windowNoTitle">true</item>
++    </style>
++
++    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
++
++    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
++
++</resources>
+Index: app/src/main/AndroidManifest.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/AndroidManifest.xml	(revision )
++++ app/src/main/AndroidManifest.xml	(revision )
+@@ -0,0 +1,49 @@
++<?xml version="1.0" encoding="utf-8"?>
++<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++    package="com.jafar.jaservtech.system3pjagung">
++
++    <!-- To auto-complete the email text field in the login form with the user's emails -->
++    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
++    <uses-permission android:name="android.permission.READ_PROFILE" />
++    <uses-permission android:name="android.permission.READ_CONTACTS" />
++
++    <application
++        android:allowBackup="true"
++        android:icon="@mipmap/ic_launcher"
++        android:label="@string/app_name"
++        android:supportsRtl="true"
++        android:theme="@style/AppTheme">
++        <activity
++            android:name=".CheckingComponentUser"
++            android:configChanges="orientation|keyboardHidden|screenSize"
++            android:label="@string/checking_component_label"
++            android:theme="@style/Theme.AppCompat.NoActionBar">
++            <intent-filter>
++                <action android:name="android.intent.action.MAIN" />
++
++                <category android:name="android.intent.category.LAUNCHER" />
++            </intent-filter>
++        </activity>
++        <activity
++            android:name=".HomeOfSystem"
++            android:label="@string/title_activity_home_of_system"
++            android:theme="@style/AppTheme.NoActionBar" />
++        <activity
++            android:name=".CreateProgressDefault"
++            android:label="@string/title_activity_create_progress_default"
++            android:parentActivityName=".HomeOfSystem">
++            <meta-data
++                android:name="android.support.PARENT_ACTIVITY"
++                android:value="com.jafar.jaservtech.system3pjagung.HomeOfSystem" />
++        </activity>
++        <activity
++            android:name=".CreateProgressNext"
++            android:label="@string/title_activity_create_progress_next"
++            android:parentActivityName=".HomeOfSystem">
++            <meta-data
++                android:name="android.support.PARENT_ACTIVITY"
++                android:value="com.jafar.jaservtech.system3pjagung.HomeOfSystem" />
++        </activity>
++    </application>
++
++</manifest>
+Index: app/src/androidTest/java/com/jafar/jaservtech/system3pjagung/ApplicationTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/androidTest/java/com/jafar/jaservtech/system3pjagung/ApplicationTest.java	(revision )
++++ app/src/androidTest/java/com/jafar/jaservtech/system3pjagung/ApplicationTest.java	(revision )
+@@ -0,0 +1,13 @@
++package com.jafar.jaservtech.system3pjagung;
++
++import android.app.Application;
++import android.test.ApplicationTestCase;
++
++/**
++ * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
++ */
++public class ApplicationTest extends ApplicationTestCase<Application> {
++    public ApplicationTest() {
++        super(Application.class);
++    }
++}
+\ No newline at end of file
+Index: app/src/main/res/drawable-v21/ic_menu_send.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/drawable-v21/ic_menu_send.xml	(revision )
++++ app/src/main/res/drawable-v21/ic_menu_send.xml	(revision )
+@@ -0,0 +1,9 @@
++<vector xmlns:android="http://schemas.android.com/apk/res/android"
++    android:width="24dp"
++    android:height="24dp"
++    android:viewportHeight="24.0"
++    android:viewportWidth="24.0">
++    <path
++        android:fillColor="#FF000000"
++        android:pathData="M2.01,21L23,12 2.01,3 2,10l15,2 -15,2z" />
++</vector>
+Index: app/src/main/java/com/jafar/jaservtech/system3pjagung/CreateProgressDefault.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/jafar/jaservtech/system3pjagung/CreateProgressDefault.java	(revision )
++++ app/src/main/java/com/jafar/jaservtech/system3pjagung/CreateProgressDefault.java	(revision )
+@@ -0,0 +1,243 @@
++package com.jafar.jaservtech.system3pjagung;
++
++import android.animation.Animator;
++import android.animation.AnimatorListenerAdapter;
++import android.annotation.TargetApi;
++import android.os.Build;
++import android.os.Bundle;
++import android.support.v7.app.AppCompatActivity;
++import android.view.View;
++import android.widget.AutoCompleteTextView;
++import android.widget.Button;
++import android.widget.EditText;
++import android.widget.Toast;
++
++import com.jafar.jaservtech.system3pjagung.dummy.DBHandler;
++import com.jafar.jaservtech.system3pjagung.dummy.JaservTechFilter;
++import com.jafar.jaservtech.system3pjagung.dummy.Progress;
++
++import java.text.SimpleDateFormat;
++import java.util.Date;
++
++/**
++ * A login screen that offers login via email/password.
++ */
++public class CreateProgressDefault extends AppCompatActivity {
++
++    // UI references.
++    private AutoCompleteTextView mEmailView;
++    private EditText mPasswordView;
++    private View mProgressView;
++    private View mLoginFormView;
++    private EditText nama, alamat, informer;
++    private Button submit;
++    @Override
++    protected void onCreate(Bundle savedInstanceState) {
++        super.onCreate(savedInstanceState);
++        setContentView(R.layout.activity_create_progress_default);
++        nama = (EditText) findViewById(R.id.nama);
++        alamat = (EditText) findViewById(R.id.alamat);
++        informer = (EditText) findViewById(R.id.auth);
++        submit = (Button) findViewById(R.id.email_sign_in_button);
++        submit.setOnClickListener(new View.OnClickListener() {
++            @Override
++            public void onClick(View v) {
++                attemptLogin();
++            }
++        });
++        mLoginFormView = (View)findViewById(R.id.login_form);
++        mProgressView = (View)findViewById(R.id.login_progress);
++    }
++
++
++    /**
++     * Callback received when a permissions request has been completed.
++     */
++    /**
++     * Set up the {@link android.app.ActionBar}, if the API is available.
++     */
++    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
++    private void setupActionBar() {
++        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
++            // Show the Up button in the action bar.
++            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
++        }
++    }
++
++    /**
++     * Attempts to sign in or register the account specified by the login form.
++     * If there are form errors (invalid email, missing fields, etc.), the
++     * errors are presented and no actual login attempt is made.
++     */
++    private void attemptLogin() {
++        // Reset errors.
++        nama.setError(null);
++        alamat.setError(null);
++        informer.setError(null);
++
++        boolean cancel = false;
++        View focusView = null;
++        // Store values at the time of the login attempt.
++        String namaS = nama.getText().toString();
++        String alamatS = alamat.getText().toString();
++        String informerS = informer.getText().toString();
++        if(JaservTechFilter.isEmpty(namaS)){
++            nama.setError("Nama progress Wajib diisi");
++            cancel = true;
++            focusView = nama;
++        }else if(!JaservTechFilter.isNameFieldValid(namaS)){
++            nama.setError("hanya : (A-Z a-z)");
++            cancel = true;
++            focusView = nama;
++        }else  if(JaservTechFilter.isContainMoreSpace(namaS)){
++            nama.setError("mengandung double spasi");
++            focusView = nama;
++            cancel = true;
++        }
++        if(JaservTechFilter.isEmpty(alamatS)){
++            alamat.setError("Lokasi Ladang wajib diisi");
++            cancel = true;
++            if(focusView == null){
++                focusView = alamat;
++            }
++        }else if(!JaservTechFilter.isAddressValid(alamatS)){
++            alamat.setError("hanya : (A-Z,a-z.0-9)");
++            cancel = true;
++            if(focusView == null){
++                focusView = alamat;
++            }
++        }else if(JaservTechFilter.isContainMoreSpace(alamatS)){
++            alamat.setError("mengandung double spasi");
++            cancel = true;
++            if(focusView == null){
++                focusView = alamat;
++            }
++        }
++
++        if(JaservTechFilter.isEmpty(informerS)){
++            informer.setError("Nama penanggung jawab progress wajib diisi");
++            cancel = true;
++            if(focusView == null){
++                focusView = informer;
++            }
++        }else if(!JaservTechFilter.isNameValid(informerS)){
++            informer.setError("hanya : (A-Z,a-z.0-9)");
++            cancel = true;
++            if(focusView == null){
++                focusView = informer;
++            }
++        }else if(JaservTechFilter.isContainMoreSpace(informerS)){
++            informer.setError("mengandung double spasi");
++            cancel = true;
++            if(focusView == null){
++                focusView = informer;
++            }
++        }
++
++        /*
++        // Check for a valid password, if the user entered one.
++        if (!TextUtils.isEmpty(nama) && !isPasswordValid(nama)) {
++            mPasswordView.setError(getString(R.string.error_invalid_password));
++            focusView = mPasswordView;
++            cancel = true;
++        }
++
++        // Check for a valid email address.
++        if (TextUtils.isEmpty(email)) {
++            mEmailView.setError(getString(R.string.error_field_required));
++            focusView = mEmailView;
++            cancel = true;
++        } else if (!isEmailValid(email)) {
++            mEmailView.setError(getString(R.string.error_invalid_email));
++            focusView = mEmailView;
++            cancel = true;
++        }
++        */
++        if (cancel) {
++            focusView.requestFocus();
++            // There was an error; don't attempt login and focus the first
++            // form field with an error.
++        } else {
++            // Show a progress spinner, and kick off a background task to
++            // perform the user login attempt.
++            try{
++                showProgress(true);
++                Thread.sleep(3000);
++            }catch (InterruptedException e){
++
++            }
++            Date h = new Date();
++            SimpleDateFormat jj = new SimpleDateFormat("yyyy.MM.dd");
++            Progress s = new Progress();
++            s.setId(jj.format(h) + "" + informerS.charAt(0) + "" + alamatS.charAt(2) + "" + namaS.charAt(5));
++            s.setName(namaS);
++            s.setAddress(alamatS);
++            s.setAuth(informerS);
++            s.setCat(1);
++            s.setPercentage(0);
++            s.setFinish(0);
++            s.setStartDate(jj.format(h));
++            s.setEndDate("");
++            DBHandler hjk = new DBHandler(CreateProgressDefault.this);
++            if(hjk.addProgress(s)){
++                try{
++                    Toast.makeText(CreateProgressDefault.this, "Data berhasil dimasukan", Toast.LENGTH_SHORT);
++                    Thread.sleep(3000);
++                }catch(InterruptedException e){
++
++                }finally {
++                    finish();
++                }
++            }
++            //  mAuthTask = new UserLoginTask(email, password);
++            // mAuthTask.execute((Void) null);
++        }
++    }
++
++    /*
++    private boolean isEmailValid(String email) {
++        TODO: Replace this with your own logic
++        return email.contains("@");
++    }
++
++    private boolean isPasswordValid(String password) {
++        TODO: Replace this with your own logic
++        return password.length() > 4;
++    }
++
++    /**
++     * Shows the progress UI and hides the login form.
++     */
++    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
++    private void showProgress(final boolean show) {
++        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
++        // for very easy animations. If available, use these APIs to fade-in
++        // the progress spinner.
++        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
++            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
++
++            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
++            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
++                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
++                @Override
++                public void onAnimationEnd(Animator animation) {
++                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
++                }
++            });
++
++            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
++            mProgressView.animate().setDuration(shortAnimTime).alpha(
++                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
++                @Override
++                public void onAnimationEnd(Animator animation) {
++                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
++                }
++            });
++        } else {
++            // The ViewPropertyAnimator APIs are not available, so simply show
++            // and hide the relevant UI components.
++            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
++            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
++        }
++    }
++}
+Index: app/src/main/res/layout/app_bar_home_of_system.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/app_bar_home_of_system.xml	(revision )
++++ app/src/main/res/layout/app_bar_home_of_system.xml	(revision )
+@@ -0,0 +1,36 @@
++<?xml version="1.0" encoding="utf-8"?>
++<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    xmlns:tools="http://schemas.android.com/tools"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    android:fitsSystemWindows="true"
++    tools:context="com.jafar.jaservtech.system3pjagung.HomeOfSystem">
++
++    <android.support.design.widget.AppBarLayout
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:theme="@style/AppTheme.AppBarOverlay">
++
++        <android.support.v7.widget.Toolbar
++            android:id="@+id/toolbar"
++            android:layout_width="match_parent"
++            android:layout_height="?attr/actionBarSize"
++            android:background="?attr/colorPrimary"
++            android:foreground="#666"
++            app:popupTheme="@style/AppTheme.PopupOverlay" />
++
++    </android.support.design.widget.AppBarLayout>
++
++    <include layout="@layout/content_home_of_system" />
++
++    <android.support.design.widget.FloatingActionButton
++        android:id="@+id/fab"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:layout_gravity="bottom|end"
++        android:layout_margin="@dimen/fab_margin"
++        android:foreground="#fff"
++        android:src="@android:drawable/ic_input_add" />
++
++</android.support.design.widget.CoordinatorLayout>
+Index: app/build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/build.gradle	(revision )
++++ app/build.gradle	(revision )
+@@ -0,0 +1,28 @@
++apply plugin: 'com.android.application'
++
++android {
++    compileSdkVersion 23
++    buildToolsVersion '23.0.1'
++
++    defaultConfig {
++        applicationId "com.jafar.jaservtech.system3pjagung"
++        minSdkVersion 16
++        targetSdkVersion 23
++        versionCode 1
++        versionName "1.0"
++    }
++    buildTypes {
++        release {
++            minifyEnabled false
++            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
++        }
++    }
++}
++
++dependencies {
++    compile fileTree(include: ['*.jar'], dir: 'libs')
++    compile 'com.android.support:appcompat-v7:23.1.1'
++    compile 'com.android.support:support-v4:23.1.1'
++    compile 'com.android.support:recyclerview-v7:23.1.1'
++    compile 'com.android.support:design:23.1.1'
++}
+Index: app/src/main/java/com/jafar/jaservtech/system3pjagung/CheckingComponentUser.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/jafar/jaservtech/system3pjagung/CheckingComponentUser.java	(revision )
++++ app/src/main/java/com/jafar/jaservtech/system3pjagung/CheckingComponentUser.java	(revision )
+@@ -0,0 +1,91 @@
++package com.jafar.jaservtech.system3pjagung;
++
++import android.annotation.SuppressLint;
++import android.content.Intent;
++import android.support.v7.app.ActionBar;
++import android.support.v7.app.AppCompatActivity;
++import android.os.Bundle;
++import android.os.Handler;
++import android.view.MotionEvent;
++import android.view.View;
++import android.widget.TextView;
++import com.jafar.jaservtech.system3pjagung.dummy.DBHandler;
++
++/**
++ * An example full-screen activity that shows and hides the system UI (i.e.
++ * status bar and navigation/system bar) with user interaction.
++ */
++public class CheckingComponentUser extends AppCompatActivity {
++    protected TextView progressMessage;
++    protected int codeNext;
++    protected int SPLASH_TIME = 3000;
++
++    @Override
++    public void onCreate(Bundle savedInstancestate) {
++        super.onCreate(savedInstancestate);
++        setContentView(R.layout.activity_checking_component_user);
++        this.progressMessage = (TextView) findViewById(R.id.progressMessage);
++
++        new Handler().postDelayed(new Runnable() {
++
++			/*
++             * Showing splash screen with a timer. This will be useful when you
++			 * want to show case your app logo / company
++			 */
++
++            @Override
++            public void run() {
++                // This method will be executed once the timer is over
++                // Start your app main activity
++                DBHandler test = new DBHandler(CheckingComponentUser.this);
++                Intent i = new Intent(CheckingComponentUser.this, HomeOfSystem.class);
++                startActivity(i);
++
++                // close this activity
++                finish();
++            }
++        }, SPLASH_TIME);
++    }
++}
++/*
++
++        Thread threadMe = new Thread(){
++            private int codeNext;
++            public void run(){
++                try{
++                    sleep(1000);
++                    progressMessage.setText("Checking table ...");
++                    int j=0;
++                    while(j<=10) {
++                        sleep(100);
++                        j++;
++                    }
++
++                   // SQLJaservTech testAccount = new SQLJaservTech(CheckingComponentUser.this,null,null,1);
++                   // codeNext= testAccount.totalrow("SELECT * FROM user_active");
++
++
++
++                }catch (Exception e){
++
++                }finally {
++                    Intent control = new Intent(CheckingComponentUser.this,HomeOfSystem.class);
++                    startActivity(control);
++                    finish();
++/*
++                    Intent control;
++                    if(codeNext >= 1)
++                        control = new Intent(MainActivity.this,ControlFirst.class);
++                    else
++                        control = new Intent(MainActivity.this,SignUpFirst.class);
++
++                    startActivity(control);
++                    finish();
++                    *//*
++                }
++            }
++        };
++        threadMe.start();
++    }
++}
++                */
+Index: app/src/main/res/menu/activity_home_of_system_drawer.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/menu/activity_home_of_system_drawer.xml	(revision )
++++ app/src/main/res/menu/activity_home_of_system_drawer.xml	(revision )
+@@ -0,0 +1,23 @@
++<?xml version="1.0" encoding="utf-8"?>
++<menu xmlns:android="http://schemas.android.com/apk/res/android">
++
++    <group android:checkableBehavior="single">
++        <item
++            android:id="@+id/home"
++            android:icon="@drawable/corn"
++            android:title="Home" />
++        <item
++            android:id="@+id/progress"
++            android:icon="@drawable/progress"
++            android:title="Progress" />
++        <item
++            android:id="@+id/history"
++            android:icon="@drawable/history"
++            android:title="History">
++        </item>
++        <item
++            android:id="@+id/help"
++            android:icon="@drawable/help"
++            android:title="Help" />
++    </group>
++</menu>
+Index: app/src/main/res/menu/home_of_system.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/menu/home_of_system.xml	(revision )
++++ app/src/main/res/menu/home_of_system.xml	(revision )
+@@ -0,0 +1,9 @@
++<?xml version="1.0" encoding="utf-8"?>
++<menu xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto">
++    <item
++        android:id="@+id/action_settings"
++        android:orderInCategory="100"
++        android:title="@string/action_settings"
++        app:showAsAction="never" />
++</menu>
+Index: app/proguard-rules.pro
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/proguard-rules.pro	(revision )
++++ app/proguard-rules.pro	(revision )
+@@ -0,0 +1,17 @@
++# Add project specific ProGuard rules here.
++# By default, the flags in this file are appended to flags specified
++# in C:\Users\Jafar\AppData\Local\Android\sdk/tools/proguard/proguard-android.txt
++# You can edit the include path and order by changing the proguardFiles
++# directive in build.gradle.
++#
++# For more details, see
++#   http://developer.android.com/guide/developing/tools/proguard.html
++
++# Add any project specific keep options here:
++
++# If your project uses WebView with JS, uncomment the following
++# and specify the fully qualified class name to the JavaScript interface
++# class:
++#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
++#   public *;
++#}
+Index: app/src/main/res/values/colors.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/values/colors.xml	(revision )
++++ app/src/main/res/values/colors.xml	(revision )
+@@ -0,0 +1,8 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources>
++    <color name="colorPrimary">#235622</color>
++    <color name="colorPrimaryDark">#235622</color>
++    <color name="colorAccent">#235622</color>
++
++    <color name="black_overlay">#66000000</color>
++</resources>
+Index: app/src/main/res/values-w820dp/dimens.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/values-w820dp/dimens.xml	(revision )
++++ app/src/main/res/values-w820dp/dimens.xml	(revision )
+@@ -0,0 +1,6 @@
++<resources>
++    <!-- Example customization of dimensions originally defined in res/values/dimens.xml
++         (such as screen margins) for screens with more than 820dp of available width. This
++         would include 7" and 10" devices in landscape (~960dp and ~1280dp respectively). -->
++    <dimen name="activity_horizontal_margin">64dp</dimen>
++</resources>
